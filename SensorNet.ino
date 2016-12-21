@@ -5,7 +5,7 @@
   *
   * 
   */
-
+#include <TaskScheduler.h>
 #include <Adafruit_Sensor.h>
 
 #include <DHT.h>
@@ -24,14 +24,38 @@ float temperature;
 float humidity;
 float heatIndex;
 
+#define TASK_WEBSERVER  100
+#define TASK_SENSOR     2000
+
+Scheduler runner;
+
 ESP8266WebServer server(80);
 WiFiManager wifiManager;
 
 DHT dht(DHTPIN, DHTTYPE);
 
+void webserverCallback();
+void sensorCallback();
+
+Task tWebserver(TASK_WEBSERVER, TASK_FOREVER, &webserverCallback);
+Task tSensor(TASK_SENSOR, TASK_FOREVER, &sensorCallback);
 
 void handleRoot() {
-  server.send(200, "text/plain", "hello from esp8266!");
+  String temperatureStr = convertFloat(temperature);
+  String humidityStr = convertFloat(humidity);
+  String content = "";
+  //server.send(200, "text/plain", "hello from esp8266! " + stringVal);
+
+  content+=("<html><head>");
+  content+=("<title>Dominik´s Temperatur Sensor</title>");
+  content+=("</head>");
+  content+=("<body>");
+  content+=("<div>" + temperatureStr + "</div>");
+  content+=("<div>" + humidityStr + "</div>");
+  content+=("</body>");
+  content+=("</html>");
+
+  server.send(200, "text/html", content);
 }
 
 void handleReset() {
@@ -55,6 +79,20 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 
+String convertFloat(float input) {
+  String stringVal = "";
+  char charVal[10];
+
+  dtostrf(input, 4, 4, charVal);
+  for(int i=0;i<sizeof(charVal);i++)
+  {
+    stringVal+=charVal[i];
+  }
+
+  return stringVal;
+
+}
+
 void readTemperature() {
 
   float h = dht.readHumidity();
@@ -73,7 +111,7 @@ void readTemperature() {
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(74880);
 
   delay(100);
   Serial.println("Starting");
@@ -101,12 +139,23 @@ void setup() {
   Serial.println("Web Server started");
   dht.begin();
 
+  runner.init();
+  runner.addTask(tWebserver);
+  runner.addTask(tSensor);
+  delay(2000);
+  tWebserver.enable();
+  tSensor.enable();
+
+}
+
+void webserverCallback() {
+    server.handleClient();
+}
+
+void sensorCallback() {
+    readTemperature();
 }
 
 void loop() {
-  server.handleClient();
-
-  delay(2000);
-
-  readTemperature();
+  runner.execute();
 }
