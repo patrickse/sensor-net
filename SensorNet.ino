@@ -1,6 +1,12 @@
+/**
+  * Sensor-NET
+  *
+  * Standalone Web-Based Temperature and Humidity Sensor
+  *
+  * 
+  */
+
 #include <Adafruit_Sensor.h>
-
-
 
 #include <DHT.h>
 #include <DHT_U.h>
@@ -14,6 +20,10 @@
 #define DHTPIN 2
 #define DHTTYPE DHT22
 
+float temperature;
+float humidity;
+float heatIndex;
+
 ESP8266WebServer server(80);
 WiFiManager wifiManager;
 
@@ -22,7 +32,6 @@ DHT dht(DHTPIN, DHTTYPE);
 
 void handleRoot() {
   server.send(200, "text/plain", "hello from esp8266!");
-
 }
 
 void handleReset() {
@@ -46,6 +55,22 @@ void handleNotFound(){
   server.send(404, "text/plain", message);
 }
 
+void readTemperature() {
+
+  float h = dht.readHumidity();
+
+  if (!isnan(h)) {
+    humidity = h;
+  }
+
+  float t = dht.readTemperature();
+
+  if (!isnan(t)) {
+    temperature = t;
+  }
+
+}
+
 void setup() {
 
   Serial.begin(115200);
@@ -60,7 +85,7 @@ void setup() {
   //   the fully-qualified domain name is "esp8266.local"
   // - second argument is the IP address to advertise
   //   we send our IP address on the WiFi network
-  if (!MDNS.begin("esp8266")) {
+  if (!MDNS.begin("temperature.local")) {
     Serial.println("Error setting up MDNS responder!");
     while(1) { 
       delay(1000);
@@ -82,36 +107,6 @@ void loop() {
   server.handleClient();
 
   delay(2000);
-  
-  float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  float f = dht.readTemperature(true);
 
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-  }
-
-  // Compute heat index in Fahrenheit (the default)
-  float hif = dht.computeHeatIndex(f, h);
-  // Compute heat index in Celsius (isFahreheit = false)
-  float hic = dht.computeHeatIndex(t, h, false);
-
-  Serial.print("Humidity: ");
-  Serial.print(h);
-  Serial.print(" %\t");
-  Serial.print("Temperature: ");
-  Serial.print(t);
-  Serial.print(" *C ");
-  Serial.print(f);
-  Serial.print(" *F\t");
-  Serial.print("Heat index: ");
-  Serial.print(hic);
-  Serial.print(" *C ");
-  Serial.print(hif);
-  Serial.println(" *F");
- 
+  readTemperature();
 }
