@@ -47,11 +47,16 @@ void handleRoot() {
   //server.send(200, "text/plain", "hello from esp8266! " + stringVal);
 
   content+=("<html><head>");
-  content+=("<title>Dominik´s Temperatur Sensor</title>");
+  content+=("<title>Dominik's Temperatur Sensor</title>");
+  content+=("<meta http-equiv=\"refresh\" content=\"5\" />");
   content+=("</head>");
   content+=("<body>");
-  content+=("<div>" + temperatureStr + "</div>");
-  content+=("<div>" + humidityStr + "</div>");
+  content+=("<div>");
+  content+=("<h1>Temperatur Sensor</h1>");
+  content+=("<p>Frohe Weihnachten, Dominik.</p>");
+  content+=("<div>Temperatur: " + temperatureStr + "</div>");
+  content+=("<div>Luftfeuchtigkeit: " + humidityStr + "</div>");
+  content+=("</div>");
   content+=("</body>");
   content+=("</html>");
 
@@ -110,6 +115,7 @@ void readTemperature() {
 }
 
 void setup() {
+  wifi_station_set_hostname("temperature");
 
   Serial.begin(74880);
 
@@ -129,6 +135,7 @@ void setup() {
       delay(1000);
     }
   }
+  MDNS.addService("http", "tcp", 80);
   Serial.println("mDNS responder started");
 
   server.on("/", handleRoot);
