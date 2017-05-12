@@ -44,7 +44,6 @@ void handleRoot() {
   String temperatureStr = convertFloat(temperature);
   String humidityStr = convertFloat(humidity);
   String content = "";
-  //server.send(200, "text/plain", "hello from esp8266! " + stringVal);
 
   content+=("<html><head>");
   content+=("<title>Dominik's Temperatur Sensor</title>");
@@ -53,7 +52,7 @@ void handleRoot() {
   content+=("<body>");
   content+=("<div>");
   content+=("<h1>Temperatur Sensor</h1>");
-  content+=("<p>Frohe Weihnachten, Dominik.</p>");
+  content+=("<p>Frohe Weihnachten, Bro.</p>");
   content+=("<div>Temperatur: " + temperatureStr + "</div>");
   content+=("<div>Luftfeuchtigkeit: " + humidityStr + "</div>");
   content+=("</div>");
@@ -123,12 +122,7 @@ void setup() {
   Serial.println("Starting");
 
   wifiManager.autoConnect("SENSOR-NET", "12345678");
-
-  // Set up mDNS responder:
-  // - first argument is the domain name, in this example
-  //   the fully-qualified domain name is "esp8266.local"
-  // - second argument is the IP address to advertise
-  //   we send our IP address on the WiFi network
+ 
   if (!MDNS.begin("temperature.local")) {
     Serial.println("Error setting up MDNS responder!");
     while(1) { 
