@@ -10,7 +10,7 @@ I actually plugged together some really cool arduino libraries.. so many thanks 
 
 ## Getting Started
 
-After loading the sketch onto your ESP-8266 the system will come up with a little adhoc wifi network. Connect to this network with your fone/tablet/pc and a captive portal should appear.
+After loading the sketch onto your ESP-8266 the system will come up with a little adhoc wifi network called `SENSOR-NET`. Connect to this network with your fone/tablet/pc and a captive portal should appear.
 
 Configure your private WiFi and your done. You should now be able to browse the device by opening http://temperature.local.
 
